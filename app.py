@@ -50,7 +50,7 @@ CHART_TEMPLATES = {
 
 # ==================== SIDEBAR: DESIGN SETTINGS ====================
 
-st.sidebar.header("🎨 Design Settings")
+st.sidebar.header(" Design Settings")
 
 with st.sidebar.expander("Customize Appearance", expanded=False):
     palette_name = st.selectbox("Color Palette", list(PALETTES.keys()))
@@ -107,6 +107,11 @@ st.markdown(f"""
     }}
     div[data-testid="stMetricValue"] {{
         font-family: 'IBM Plex Mono', monospace;
+        color: {palette["bg"] if palette["card"] != palette["bg"] else palette["text"]} !important;
+        opacity: 1 !important;
+    }}
+    div[data-testid="stMetricValue"] > div {{
+        color: {palette["bg"] if palette["card"] != palette["bg"] else palette["text"]} !important;
     }}
 
     button[data-baseweb="tab"] {{
