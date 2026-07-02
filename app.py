@@ -52,11 +52,12 @@ CHART_TEMPLATES = {
 
 st.sidebar.header("🎨 Design Settings")
 
-palette_name = st.sidebar.selectbox("Color Palette", list(PALETTES.keys()))
-font_name = st.sidebar.selectbox("Font Style", list(FONTS.keys()))
-header_size = st.sidebar.select_slider("Header Size", options=["Small", "Medium", "Large"], value="Medium")
-card_style_name = st.sidebar.selectbox("KPI Card Style", list(CARD_STYLES.keys()))
-chart_style = st.sidebar.selectbox("Chart Type Preference", list(CHART_TEMPLATES.keys()))
+with st.sidebar.expander("Customize Appearance", expanded=False):
+    palette_name = st.selectbox("Color Palette", list(PALETTES.keys()))
+    font_name = st.selectbox("Font Style", list(FONTS.keys()))
+    header_size = st.select_slider("Header Size", options=["Small", "Medium", "Large"], value="Medium")
+    card_style_name = st.selectbox("KPI Card Style", list(CARD_STYLES.keys()))
+    chart_style = st.selectbox("Chart Type Preference", list(CHART_TEMPLATES.keys()))
 
 st.sidebar.divider()
 
