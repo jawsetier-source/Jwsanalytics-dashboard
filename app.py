@@ -202,7 +202,9 @@ with tab1:
     st.subheader("Sales by Store")
     store_totals = sales.groupby("store_code")["gross_sales_php"].sum().reset_index()
     fig2 = px.bar(store_totals, x="store_code", y="gross_sales_php", color="store_code",
-                  title="Total Sales per Store", color_discrete_sequence=palette["chart"])
+                  title="Total Sales per Store", color_discrete_sequence=palette["chart"],
+                  text_auto=".2s")
+    fig2.update_traces(textposition="outside")
     st.plotly_chart(style_fig(fig2), use_container_width=True)
 
     st.subheader("SKU Movement — Fast vs Slow Moving")
@@ -215,7 +217,9 @@ with tab1:
         st.markdown("**🔥 Top 5 Fast Moving SKUs**")
         top5 = sku_totals.head(5)
         fig5 = px.bar(top5, x="units_sold", y="sku", orientation="h",
-                      color_discrete_sequence=["#2F7A72"], title="Highest Units Sold")
+                      color_discrete_sequence=["#2F7A72"], title="Highest Units Sold",
+                      text_auto=True)
+        fig5.update_traces(textposition="outside")
         fig5.update_yaxes(categoryorder="total ascending")
         st.plotly_chart(style_fig(fig5), use_container_width=True)
 
@@ -223,7 +227,9 @@ with tab1:
         st.markdown("**🐢 Bottom 5 Slow Moving SKUs**")
         bottom5 = sku_totals.tail(5)
         fig6 = px.bar(bottom5, x="units_sold", y="sku", orientation="h",
-                      color_discrete_sequence=["#D64545"], title="Lowest Units Sold")
+                      color_discrete_sequence=["#D64545"], title="Lowest Units Sold",
+                      text_auto=True)
+        fig6.update_traces(textposition="outside")
         fig6.update_yaxes(categoryorder="total descending")
         st.plotly_chart(style_fig(fig6), use_container_width=True)
 
@@ -243,7 +249,9 @@ with tab2:
     fig3 = px.bar(latest_inv.sort_values("on_hand_units"), x="on_hand_units", y="sku",
                   color="status", orientation="h",
                   color_discrete_map={"Critical": "#D64545", "Low": palette["accent"], "Healthy": "#2F7A72"},
-                  title=f"Stock on Hand as of {latest_date.date()}")
+                  title=f"Stock on Hand as of {latest_date.date()}",
+                  text_auto=True)
+    fig3.update_traces(textposition="outside")
     st.plotly_chart(style_fig(fig3), use_container_width=True)
 
     st.dataframe(latest_inv[["store_code", "sku", "category", "on_hand_units", "reorder_point", "status"]],
@@ -260,7 +268,9 @@ with tab3:
     fig4 = px.bar(rider_summary.sort_values("on_time_rate"), x="on_time_rate", y="rider_name",
                   color="on_time_rate", orientation="h",
                   color_continuous_scale=["#D64545", palette["accent"], "#2F7A72"],
-                  title="On-Time Delivery Rate (%)")
+                  title="On-Time Delivery Rate (%)",
+                  text_auto=True)
+    fig4.update_traces(textposition="outside")
     st.plotly_chart(style_fig(fig4), use_container_width=True)
 
     st.dataframe(rider_summary, use_container_width=True)
