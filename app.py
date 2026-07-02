@@ -2,83 +2,137 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# ---------- Page setup ----------
 st.set_page_config(page_title="Jwsetier Sample Dashboard", layout="wide")
 
-# ---------- Custom styling ----------
-st.markdown("""
+# ==================== DESIGN OPTIONS ====================
+
+PALETTES = {
+    "Dark Ops (Charcoal & Amber)": {
+        "bg": "#1C1F22", "card": "#F7F5F0", "text": "#F7F5F0",
+        "accent": "#E8963C", "chart": ["#E8963C", "#2F7A72", "#D64545", "#F7F5F0", "#7A9E9F", "#C97B3D"],
+    },
+    "Clean Corporate (White & Navy)": {
+        "bg": "#FFFFFF", "card": "#F0F3F7", "text": "#1E293B",
+        "accent": "#1E3A5F", "chart": ["#1E3A5F", "#3B6EA5", "#7DA3C4", "#B0C4DE", "#4A5568", "#2C4A6E"],
+    },
+    "Fresh Retail (Gray & Green)": {
+        "bg": "#F5F5F5", "card": "#FFFFFF", "text": "#1B1B1B",
+        "accent": "#2E7D32", "chart": ["#2E7D32", "#66BB6A", "#A5D6A7", "#1B5E20", "#81C784", "#43A047"],
+    },
+    "Bold Modern (Navy & Cyan)": {
+        "bg": "#0D1B2A", "card": "#1B2A3D", "text": "#E0F7FA",
+        "accent": "#00B4D8", "chart": ["#00B4D8", "#0077B6", "#90E0EF", "#CAF0F8", "#023E8A", "#48CAE4"],
+    },
+    "Warm Minimal (Cream & Terracotta)": {
+        "bg": "#FAF6F0", "card": "#FFFFFF", "text": "#3D2B1F",
+        "accent": "#C1502E", "chart": ["#C1502E", "#E08E45", "#7A9E7E", "#3D2B1F", "#D4A373", "#9C6644"],
+    },
+}
+
+FONTS = {
+    "Modern Sans (Inter)": "'Inter', sans-serif",
+    "Condensed Bold (Barlow Condensed)": "'Barlow Condensed', sans-serif",
+    "Classic Sans (System Default)": "sans-serif",
+    "Monospace (IBM Plex Mono)": "'IBM Plex Mono', monospace",
+}
+
+CARD_STYLES = {
+    "Left border accent": "border-left: 4px solid {accent}; border-radius: 4px;",
+    "Plain / flat": "border-radius: 8px;",
+    "Full border": "border: 1px solid {accent}; border-radius: 8px;",
+}
+
+CHART_TEMPLATES = {
+    "Bars": "bar",
+    "Lines only": "line",
+    "Mixed (bar + line)": "mixed",
+}
+
+# ==================== SIDEBAR: DESIGN SETTINGS ====================
+
+st.sidebar.header("🎨 Design Settings")
+
+palette_name = st.sidebar.selectbox("Color Palette", list(PALETTES.keys()))
+font_name = st.sidebar.selectbox("Font Style", list(FONTS.keys()))
+header_size = st.sidebar.select_slider("Header Size", options=["Small", "Medium", "Large"], value="Medium")
+card_style_name = st.sidebar.selectbox("KPI Card Style", list(CARD_STYLES.keys()))
+chart_style = st.sidebar.selectbox("Chart Type Preference", list(CHART_TEMPLATES.keys()))
+
+st.sidebar.divider()
+
+palette = PALETTES[palette_name]
+font_family = FONTS[font_name]
+card_css = CARD_STYLES[card_style_name].format(accent=palette["accent"])
+header_px = {"Small": "28px", "Medium": "36px", "Large": "48px"}[header_size]
+
+# ==================== APPLY STYLING ====================
+
+st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
+    .stApp {{
+        background-color: {palette["bg"]};
+    }}
 
-    h1 {
-        font-family: 'Barlow Condensed', sans-serif;
+    html, body, [class*="css"] {{
+        font-family: {font_family};
+        color: {palette["text"]};
+    }}
+
+    h1 {{
+        font-family: {font_family};
         font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        color: #F7F5F0;
-    }
+        font-size: {header_px} !important;
+        color: {palette["text"]};
+    }}
 
-    h2, h3 {
-        font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        color: #F7F5F0;
-    }
+    h2, h3 {{
+        font-family: {font_family};
+        color: {palette["text"]};
+    }}
 
-    /* KPI metric cards */
-    div[data-testid="stMetric"] {
-        background-color: #F7F5F0;
-        border-radius: 4px;
+    div[data-testid="stMetric"] {{
+        background-color: {palette["card"]};
         padding: 16px 18px;
-        border-left: 4px solid #E8963C;
-    }
-    div[data-testid="stMetric"] label {
-        color: #1C1F22 !important;
+        {card_css}
+    }}
+    div[data-testid="stMetric"] label {{
+        color: {palette["bg"] if palette["card"] != palette["bg"] else palette["text"]} !important;
         font-size: 11px !important;
         text-transform: uppercase;
         letter-spacing: 1px;
         font-weight: 600;
-    }
-    div[data-testid="stMetricValue"] {
+    }}
+    div[data-testid="stMetricValue"] {{
         font-family: 'IBM Plex Mono', monospace;
-        color: #1C1F22 !important;
-    }
+    }}
 
-    /* Tabs */
-    button[data-baseweb="tab"] {
-        font-family: 'Inter', sans-serif;
+    button[data-baseweb="tab"] {{
+        font-family: {font_family};
         font-weight: 600;
         text-transform: uppercase;
         font-size: 13px;
-        letter-spacing: 0.5px;
-    }
+    }}
 
-    /* Caption / accent text */
-    .stCaption, [data-testid="stCaptionContainer"] {
-        color: #E8963C !important;
+    [data-testid="stCaptionContainer"] {{
+        color: {palette["accent"]} !important;
         text-transform: uppercase;
         letter-spacing: 1px;
         font-size: 11px !important;
-    }
-
-    hr {
-        border-color: rgba(247,245,240,0.15) !important;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
 st.title("Sample Dashboard")
 st.caption("Sales · Inventory · Rider Delivery Analytics — Portfolio Project by Julie Ann Wabe-Setier")
 
-# ---------- Load raw data ----------
+# ==================== LOAD DATA ====================
+
 sales = pd.read_csv("sales_data.csv", parse_dates=["date"])
 inventory = pd.read_csv("inventory_data.csv", parse_dates=["date"])
 riders = pd.read_csv("rider_deliveries.csv", parse_dates=["date"])
 
-# ---------- Sidebar filter ----------
 store_list = sorted(sales["store_code"].unique())
 selected_store = st.sidebar.selectbox("Filter by Store", ["All Stores"] + store_list)
 
@@ -91,7 +145,8 @@ else:
     inventory_f = inventory
     riders_f = riders
 
-# ---------- KPI row ----------
+# ==================== KPI ROW ====================
+
 col1, col2, col3, col4 = st.columns(4)
 
 total_sales = sales_f["gross_sales_php"].sum()
@@ -106,32 +161,39 @@ col4.metric("Avg On-Time Delivery", f"{avg_on_time}%")
 
 st.divider()
 
-# ---------- Plotly chart theme helper ----------
+# ==================== CHART HELPER ====================
+
 def style_fig(fig):
     fig.update_layout(
-        plot_bgcolor="#1C1F22",
-        paper_bgcolor="#1C1F22",
-        font_color="#F7F5F0",
-        title_font_family="Inter",
+        plot_bgcolor=palette["bg"],
+        paper_bgcolor=palette["bg"],
+        font_color=palette["text"],
         margin=dict(t=50, l=10, r=10, b=10),
     )
     return fig
 
-# ---------- Tabs ----------
+def make_trend_chart(df, x, y, title):
+    if CHART_TEMPLATES[chart_style] == "bar":
+        fig = px.bar(df, x=x, y=y, title=title, color_discrete_sequence=[palette["accent"]])
+    else:
+        fig = px.line(df, x=x, y=y, title=title)
+        fig.update_traces(line_color=palette["accent"], line_width=2.5)
+    return style_fig(fig)
+
+# ==================== TABS ====================
+
 tab1, tab2, tab3 = st.tabs(["📈 Sales", "📦 Inventory", "🛵 Rider Delivery"])
 
 with tab1:
     st.subheader("Daily Sales Trend")
     daily_sales = sales_f.groupby("date")["gross_sales_php"].sum().reset_index()
-    fig = px.line(daily_sales, x="date", y="gross_sales_php", title="Gross Sales Over Time")
-    fig.update_traces(line_color="#2F7A72", line_width=2.5)
-    st.plotly_chart(style_fig(fig), use_container_width=True)
+    st.plotly_chart(make_trend_chart(daily_sales, "date", "gross_sales_php", "Gross Sales Over Time"),
+                     use_container_width=True)
 
     st.subheader("Sales by Store")
     store_totals = sales.groupby("store_code")["gross_sales_php"].sum().reset_index()
     fig2 = px.bar(store_totals, x="store_code", y="gross_sales_php", color="store_code",
-                  title="Total Sales per Store",
-                  color_discrete_sequence=["#E8963C", "#2F7A72", "#D64545", "#F7F5F0", "#7A9E9F", "#C97B3D"])
+                  title="Total Sales per Store", color_discrete_sequence=palette["chart"])
     st.plotly_chart(style_fig(fig2), use_container_width=True)
 
 with tab2:
@@ -147,7 +209,7 @@ with tab2:
     )
     fig3 = px.bar(latest_inv.sort_values("on_hand_units"), x="on_hand_units", y="sku",
                   color="status", orientation="h",
-                  color_discrete_map={"Critical": "#D64545", "Low": "#E8963C", "Healthy": "#2F7A72"},
+                  color_discrete_map={"Critical": "#D64545", "Low": palette["accent"], "Healthy": "#2F7A72"},
                   title=f"Stock on Hand as of {latest_date.date()}")
     st.plotly_chart(style_fig(fig3), use_container_width=True)
 
@@ -164,7 +226,7 @@ with tab3:
 
     fig4 = px.bar(rider_summary.sort_values("on_time_rate"), x="on_time_rate", y="rider_name",
                   color="on_time_rate", orientation="h",
-                  color_continuous_scale=["#D64545", "#E8963C", "#2F7A72"],
+                  color_continuous_scale=["#D64545", palette["accent"], "#2F7A72"],
                   title="On-Time Delivery Rate (%)")
     st.plotly_chart(style_fig(fig4), use_container_width=True)
 
