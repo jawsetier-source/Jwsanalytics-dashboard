@@ -2,7 +2,7 @@
 
 An interactive analytics dashboard built to demonstrate end-to-end operations reporting for a multi-unit food & beverage / convenience store business — covering **sales performance, inventory management, and rider/delivery logistics**.
 
-🔗 **Live Demo:** [Insert your Streamlit link here]
+🔗 **Live Demo:** [View Dashboard](https://jwsanalytics-dashboard-6mpqtfybd7cs2gdsngeeq2.streamlit.app)
 📁 **Raw Data:** Sample data included in this repo (`sales_data.csv`, `inventory_data.csv`, `rider_deliveries.csv`, `sku_sales.csv`)
 
 ---
