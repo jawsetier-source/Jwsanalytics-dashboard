@@ -50,7 +50,7 @@ CHART_TEMPLATES = {
 
 # ==================== SIDEBAR: DESIGN SETTINGS ====================
 
-st.sidebar.header(" Design Settings")
+st.sidebar.header("🎨 Design Settings")
 
 with st.sidebar.expander("Customize Appearance", expanded=False):
     palette_name = st.selectbox("Color Palette", list(PALETTES.keys()))
@@ -138,6 +138,7 @@ st.caption("Sales · Inventory · Rider Delivery Analytics — Portfolio Project
 sales = pd.read_csv("sales_data.csv", parse_dates=["date"])
 inventory = pd.read_csv("inventory_data.csv", parse_dates=["date"])
 riders = pd.read_csv("rider_deliveries.csv", parse_dates=["date"])
+sku_sales = pd.read_csv("sku_sales.csv", parse_dates=["date"])
 
 store_list = sorted(sales["store_code"].unique())
 selected_store = st.sidebar.selectbox("Filter by Store", ["All Stores"] + store_list)
@@ -146,10 +147,12 @@ if selected_store != "All Stores":
     sales_f = sales[sales["store_code"] == selected_store]
     inventory_f = inventory[inventory["store_code"] == selected_store]
     riders_f = riders[riders["store_code"] == selected_store]
+    sku_sales_f = sku_sales[sku_sales["store_code"] == selected_store]
 else:
     sales_f = sales
     inventory_f = inventory
     riders_f = riders
+    sku_sales_f = sku_sales
 
 # ==================== KPI ROW ====================
 
@@ -201,6 +204,30 @@ with tab1:
     fig2 = px.bar(store_totals, x="store_code", y="gross_sales_php", color="store_code",
                   title="Total Sales per Store", color_discrete_sequence=palette["chart"])
     st.plotly_chart(style_fig(fig2), use_container_width=True)
+
+    st.subheader("SKU Movement — Fast vs Slow Moving")
+    sku_totals = sku_sales_f.groupby("sku")["units_sold"].sum().reset_index()
+    sku_totals = sku_totals.sort_values("units_sold", ascending=False)
+
+    col_fast, col_slow = st.columns(2)
+
+    with col_fast:
+        st.markdown("**🔥 Top 5 Fast Moving SKUs**")
+        top5 = sku_totals.head(5)
+        fig5 = px.bar(top5, x="units_sold", y="sku", orientation="h",
+                      color_discrete_sequence=["#2F7A72"], title="Highest Units Sold")
+        fig5.update_yaxes(categoryorder="total ascending")
+        st.plotly_chart(style_fig(fig5), use_container_width=True)
+
+    with col_slow:
+        st.markdown("**🐢 Bottom 5 Slow Moving SKUs**")
+        bottom5 = sku_totals.tail(5)
+        fig6 = px.bar(bottom5, x="units_sold", y="sku", orientation="h",
+                      color_discrete_sequence=["#D64545"], title="Lowest Units Sold")
+        fig6.update_yaxes(categoryorder="total descending")
+        st.plotly_chart(style_fig(fig6), use_container_width=True)
+
+    st.dataframe(sku_totals.rename(columns={"units_sold": "total_units_sold"}), use_container_width=True)
 
 with tab2:
     st.subheader("Stock Levels vs Reorder Point (latest count)")
